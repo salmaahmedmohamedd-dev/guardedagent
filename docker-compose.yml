@@ -1,0 +1,6 @@
+services:
+  agent:
+    build: .
+    image: guardedagent:1.0
+    env_file:
+      - .env
