@@ -1,7 +1,7 @@
 import ast #abstract syntax tree .safer than eval().as it parses string.parse is take text and analyze it to representation comp. understands
 import operator # gives python funcs for math ops
-import requests #python to comm with a webs service
 import logging 
+import re 
 import os 
 from tavily import TavilyClient
 
@@ -65,16 +65,16 @@ def web_search(query: str):#query is the text we want to search for
         return "Search API key not configured"
 
 
-    tavily = TavilyClient(api_key=api_key)
-
-    response = tavily.search(
-        query=query,
-        max_results=3
-    )
-
-    results = response["results"]
-
-    return results
+    try:
+        tavily = TavilyClient(api_key=api_key)
+        response = tavily.search(
+            query=query,
+            max_results=3
+        )
+        return response["results"]
+    except Exception as e:
+        logger.error("web_search failed: %s", e)
+        return "Search failed"
 
 ALLOWED_TOOLS = {"calculator", "web_search"} # tool allowlist
 
@@ -107,13 +107,16 @@ def use_tool(tool_name: str, tool_input: str):
     if tool_name == "web_search":
         return web_search(tool_input)
 
+MATH_EXPRESSION_RE = re.compile(r"^[\d\s\+\-\*/\.\(\)]+$")
+ 
 def choose_tool(question: str):
-    if any(op in question for op in ["+", "-", "*", "/"]):
+    stripped = question.strip()
+    if stripped and MATH_EXPRESSION_RE.match(stripped):
         return {
             "tool": "calculator",
-            "input": question
+            "input": stripped
         }
-
+ 
     return {
         "tool": "web_search",
         "input": question
@@ -125,14 +128,16 @@ def run_agent(question: str):
     logger.info("Tool request: %s", request)#lodder instead of print.to record what happened
 
     if not validate_tool_request(request):
-        print("Tool execution failed:", e)
+        logger.warning("Tool request rejected by guardrail: %s", request)
+        print("Tool request rejected: invalid or disallowed request")
         return
-
+ 
     try:
         result = use_tool(request["tool"], request["input"])
         print(result)
-
+ 
     except Exception as e:
+        logger.error("Tool execution failed: %s", e)
         print("Tool execution failed:", e)
 
 #only run when file is exec directly
