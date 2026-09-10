@@ -1,3 +1,4 @@
-python-dotenv
-requests
-tavily-python
+python-dotenv==1.0.1
+requests==2.32.3
+tavily-python==0.5.0
+pytest==8.3.3
