@@ -91,7 +91,7 @@ def test_run_agent_normal_path_does_not_crash():
     run_agent("What's the state-of-the-art model?")  # should not raise
 
 
-
+def test_run_agent_handles_guardrail_rejection_without_crashing(capsys):
     run_agent("   ")  # should not raise
     captured = capsys.readouterr()
     assert "rejected" in captured.out.lower()
