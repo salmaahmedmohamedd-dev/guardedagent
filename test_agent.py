@@ -71,25 +71,25 @@ def test_choose_tool_routes_pure_math_to_calculator():
     request = choose_tool("25 * 17")
     assert request["tool"] == "calculator"
 
-
+@pytest.mark.integration
 def test_choose_tool_routes_question_with_hyphen_to_search():
     # Regression test: this used to route to the calculator because of the
     # hyphen in "state-of-the-art", fail there, and never fall back.
     request = choose_tool("What's the state-of-the-art model?")
     assert request["tool"] == "web_search"
 
-
+@pytest.mark.integration
 def test_choose_tool_routes_plain_question_to_search():
     request = choose_tool("What is Docker?")
     assert request["tool"] == "web_search"
 
 
 # --- run_agent (previously untested — this is where the NameError lived) ---
-
+@pytest.mark.integration
 def test_run_agent_normal_path_does_not_crash():
     run_agent("What's the state-of-the-art model?")  # should not raise
 
-
+@pytest.mark.integration
 def test_run_agent_handles_empty_input_without_crashing(capsys):
     run_agent("   ")
     captured = capsys.readouterr()
