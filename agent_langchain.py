@@ -11,11 +11,13 @@ from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 
 import agent
-from agent import ALLOWED_TOOLS, MODEL, OLLAMA_URL, logger, use_tool  # same logger, so the demo UI can trace it
+from agent import ALLOWED_TOOLS, MODEL, MODEL_TIMEOUT, OLLAMA_URL, logger, use_tool  # same logger, so the demo UI can trace it
 from agent_langgraph import build_graph, run_graph
 
-# LangChain's client for the same local ollama server. ollama ignores the key but the client requires one
-llm = ChatOpenAI(base_url=OLLAMA_URL, api_key="ollama", model=MODEL, temperature=0)
+# LangChain's client for the same local ollama server. ollama ignores the key but the client requires one.
+# same timeout and no retries as agent.py, so a hung ollama fails fast in both versions
+llm = ChatOpenAI(base_url=OLLAMA_URL, api_key="ollama", model=MODEL, temperature=0,
+                 timeout=MODEL_TIMEOUT, max_retries=0)
 
 
 # TOOLS: LangChain wrappers around the same tool functions. they only run after the guardrails approve

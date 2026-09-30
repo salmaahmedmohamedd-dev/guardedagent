@@ -18,7 +18,10 @@ logger = logging.getLogger(__name__)  # every rejection is logged here, this is 
 
 # local ollama server. docker sets OLLAMA_BASE_URL because "localhost" inside a container is the container itself
 OLLAMA_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434/v1")
-client = OpenAI(base_url=OLLAMA_URL, api_key="ollama")
+# seconds per model call. a cold model can take a minute to load, but a hung ollama must not freeze the demo forever.
+# max_retries=0 so the timeout means what it says (the default would retry twice and triple the wait)
+MODEL_TIMEOUT = 120
+client = OpenAI(base_url=OLLAMA_URL, api_key="ollama", timeout=MODEL_TIMEOUT, max_retries=0)
 MODEL = "qwen2.5:7b"  # small, local
 
 # limits
