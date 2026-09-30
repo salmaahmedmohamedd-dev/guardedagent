@@ -1,6 +1,25 @@
 services:
   agent:
     build: .
-    image: guardedagent:1.0
+    image: guardedagent:1.1
     env_file:
-      - .env
+      - .env   # TAVILY_API_KEY is read here when the container starts, it is never inside the image
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434/v1  # ollama runs on my machine, not in the container
+      HOST: 0.0.0.0                                          # listen inside the container so the port mapping works
+    extra_hosts:
+      - "host.docker.internal:host-gateway"                  # makes host.docker.internal work on linux too
+    ports:
+      - "127.0.0.1:8000:8000"   # only this computer can open the page, not other devices on the network
+
+    # layer 3: environment isolation. the container can do as little as possible
+    read_only: true             # the app cannot change its own files or install anything
+    tmpfs:
+      - /tmp                    # the only writable place, wiped when the container stops
+    cap_drop:
+      - ALL                     # no special linux permissions at all
+    security_opt:
+      - no-new-privileges:true  # nothing inside can gain more rights later
+    mem_limit: 512m             # a runaway process cannot eat all my memory
+    pids_limit: 100             # and cannot start endless processes
+    restart: unless-stopped

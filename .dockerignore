@@ -1,7 +1,16 @@
+# files that must NEVER be copied into the image by "COPY . ."
+# secrets: the key is passed in when the container starts (env_file in docker-compose.yml), never baked in
 .env
-.venv
-venv
-__pycache__
+.env.*
+# my local virtual environment: huge and built for my machine, the image installs its own packages
+venv/
+.venv/
+# python and test caches
+__pycache__/
 *.pyc
-.git
-.gitignore
+.pytest_cache/
+# git history and docker files themselves are not needed inside the image
+.git/
+Dockerfile
+docker-compose.yml
+.dockerignore
